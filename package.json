@@ -1,0 +1,17 @@
+{
+  "name": "auth-trees",
+  "version": "1.0.0",
+  "description": "",
+  "main": "go.js",
+  "dependencies": {
+    "json-stringify-pretty-compact": "^2.0.0",
+    "mkdir-recursive": "^0.4.0",
+    "node-fetch": "^2.4.0"
+  },
+  "devDependencies": {},
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "",
+  "license": "ISC"
+}
