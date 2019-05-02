@@ -1,6 +1,6 @@
 # OpenAM Auth Tree Export Utility
 
-```base
+```bash
 # See usage
 node export-tree.js
 
