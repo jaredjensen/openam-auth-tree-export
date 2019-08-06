@@ -1,10 +1,10 @@
 const fs = require("fs");
 const fetch = require("node-fetch");
-const path = require("path")
-const mkdirSync = require('mkdir-recursive').mkdirSync;
+const path = require("path");
+const mkdirSync = require("mkdir-recursive").mkdirSync;
 const script = path.basename(process.argv[1]);
 
-const AM_BASE_URL = "http://openam:8886";
+const AM_BASE_URL = "http://openam:8886/am";
 
 const USAGE = `Exports JSON configuration files for an authentication tree, its individual nodes, and supporting scripts.
 
@@ -30,9 +30,9 @@ try {
 async function main(treeName, outDir) {
   const ssoToken = await getSession();
   const tree = await getTree(treeName, ssoToken);
-  await storeEntity('AuthTree', tree, outDir);
+  await storeEntity("AuthTree", tree, outDir);
   await processChildren(tree, outDir, ssoToken);
-  console.log('Done!');
+  console.log("Done!");
 }
 
 async function processChildren(entity, outDir, ssoToken) {
@@ -57,7 +57,7 @@ async function processChildren(entity, outDir, ssoToken) {
 
   if (entity.data.script) {
     const script = await getScript(entity.data.script, ssoToken);
-    await storeEntity('Scripts', script, outDir);
+    await storeEntity("Scripts", script, outDir);
   }
 }
 
@@ -72,8 +72,8 @@ async function getTree(name, ssoToken) {
       amsterVersion: "&{version}",
       entityType: "AuthTree",
       entityId: data._id,
-      pathParams: {}
-    }
+      pathParams: {},
+    },
   };
 }
 
@@ -82,7 +82,7 @@ async function getNode(type, id, ssoToken) {
   const data = await request(url, ssoToken);
   delete data._rev;
   delete data.password;
-  delete data['password-encrypted'];
+  delete data["password-encrypted"];
   return {
     data,
     metadata: {
@@ -90,7 +90,7 @@ async function getNode(type, id, ssoToken) {
       amsterVersion: "&{version}",
       entityType: getEntityType(type),
       entityId: data._id,
-      pathParams: {}
+      pathParams: {},
     },
   };
 }
@@ -105,7 +105,7 @@ async function getScript(id, ssoToken) {
       amsterVersion: "&{version}",
       entityType: "Scripts",
       entityId: id,
-      pathParams: {}
+      pathParams: {},
     },
   };
 }
@@ -113,9 +113,9 @@ async function getScript(id, ssoToken) {
 async function request(url, ssoToken) {
   const init = {
     headers: {
-      iplanetdirectorypro: ssoToken
+      iplanetdirectorypro: ssoToken,
     },
-    method: "GET"
+    method: "GET",
   };
 
   const res = await fetch(url, init);
@@ -136,9 +136,9 @@ async function getSession() {
     headers: {
       "accept-api-version": "resource=2.0,protocol=1.0",
       "x-openam-username": "amadmin",
-      "x-openam-password": "password"
+      "x-openam-password": "REPLACE_WITH_AM_PASSWORD",
     },
-    method: "POST"
+    method: "POST",
   };
 
   const res = await fetch(url, init);
@@ -156,7 +156,7 @@ async function storeEntity(nodeDirName, entity, outDir) {
   const { entityId } = entity.metadata;
   const entityDir = path.resolve(outDir, nodeDirName);
   mkdirSync(entityDir);
-  const filePath = path.resolve(entityDir, `${entityId}.json`)
+  const filePath = path.resolve(entityDir, `${entityId}.json`);
   return createFile(entity, filePath);
 }
 
@@ -167,20 +167,20 @@ function createFile(entity, filePath) {
 
 function getEntityType(nodeType) {
   switch (nodeType) {
-    case 'PageNode':
-    case 'WebAuthnAuthenticationNode':
-    case 'WebAuthnRegistrationNode':
+    case "PageNode":
+    case "WebAuthnAuthenticationNode":
+    case "WebAuthnRegistrationNode":
       return nodeType;
-    case 'OneTimePasswordGeneratorNode':
-      return 'HOTPGenerator';
-    case 'OneTimePasswordSmtpSenderNode':
-      return 'OTPEmailSender';
-    case 'OneTimePasswordCollectorDecisionNode':
-      return 'OTPCollectorDecision';
-    case 'OneTimePasswordSmsSenderNode':
-      return 'OTPSMSSender';
+    case "OneTimePasswordGeneratorNode":
+      return "HOTPGenerator";
+    case "OneTimePasswordSmtpSenderNode":
+      return "OTPEmailSender";
+    case "OneTimePasswordCollectorDecisionNode":
+      return "OTPCollectorDecision";
+    case "OneTimePasswordSmsSenderNode":
+      return "OTPSMSSender";
     default:
-      return nodeType.replace(/Node$/, '');
+      return nodeType.replace(/Node$/, "");
   }
 }
 
