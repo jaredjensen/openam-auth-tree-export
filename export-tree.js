@@ -1,7 +1,7 @@
 const fs = require("fs");
 const fetch = require("node-fetch");
-const path = require("path")
-const mkdirSync = require('mkdir-recursive').mkdirSync;
+const path = require("path");
+const mkdirSync = require("mkdir-recursive").mkdirSync;
 const script = path.basename(process.argv[1]);
 
 const AM_BASE_URL = "https://default.iam.example.com/am";
@@ -31,9 +31,9 @@ try {
 async function main(treeName, outDir) {
   const ssoToken = await getSession();
   const tree = await getTree(treeName, ssoToken);
-  await storeEntity('AuthTree', tree, outDir);
+  await storeEntity("AuthTree", tree, outDir);
   await processChildren(tree, outDir, ssoToken);
-  console.log('Done!');
+  console.log("Done!");
 }
 
 async function processChildren(entity, outDir, ssoToken) {
@@ -58,7 +58,7 @@ async function processChildren(entity, outDir, ssoToken) {
 
   if (entity.data.script) {
     const script = await getScript(entity.data.script, ssoToken);
-    await storeEntity('Scripts', script, outDir);
+    await storeEntity("Scripts", script, outDir);
   }
 }
 
@@ -73,8 +73,8 @@ async function getTree(name, ssoToken) {
       amsterVersion: "&{version}",
       entityType: "AuthTree",
       entityId: data._id,
-      pathParams: {}
-    }
+      pathParams: {},
+    },
   };
 }
 
@@ -83,7 +83,7 @@ async function getNode(type, id, ssoToken) {
   const data = await request(url, ssoToken);
   delete data._rev;
   delete data.password;
-  delete data['password-encrypted'];
+  delete data["password-encrypted"];
   return {
     data,
     metadata: {
@@ -91,7 +91,7 @@ async function getNode(type, id, ssoToken) {
       amsterVersion: "&{version}",
       entityType: getEntityType(type),
       entityId: data._id,
-      pathParams: {}
+      pathParams: {},
     },
   };
 }
@@ -106,7 +106,7 @@ async function getScript(id, ssoToken) {
       amsterVersion: "&{version}",
       entityType: "Scripts",
       entityId: id,
-      pathParams: {}
+      pathParams: {},
     },
   };
 }
@@ -114,7 +114,7 @@ async function getScript(id, ssoToken) {
 async function request(url, ssoToken) {
   const init = {
     headers: {
-      iplanetdirectorypro: ssoToken
+      iplanetdirectorypro: ssoToken,
     },
     method: "GET",
   };
@@ -139,7 +139,7 @@ async function getSession() {
       "x-openam-username": "amadmin",
       "x-openam-password": AM_PASSWORD
     },
-    method: "POST"
+    method: "POST",
   };
 
   const res = await _fetch(url, init);
@@ -166,7 +166,7 @@ async function storeEntity(nodeDirName, entity, outDir) {
   const { entityId } = entity.metadata;
   const entityDir = path.resolve(outDir, nodeDirName);
   mkdirSync(entityDir);
-  const filePath = path.resolve(entityDir, `${entityId}.json`)
+  const filePath = path.resolve(entityDir, `${entityId}.json`);
   return createFile(entity, filePath);
 }
 
@@ -177,9 +177,9 @@ function createFile(entity, filePath) {
 
 function getEntityType(nodeType) {
   switch (nodeType) {
-    case 'PageNode':
-    case 'WebAuthnAuthenticationNode':
-    case 'WebAuthnRegistrationNode':
+    case "PageNode":
+    case "WebAuthnAuthenticationNode":
+    case "WebAuthnRegistrationNode":
       return nodeType;
     case 'OneTimePasswordGeneratorNode':
       return 'HOTPGenerator';
@@ -200,7 +200,7 @@ function getEntityType(nodeType) {
     case 'ValidatedPasswordNode':
       return 'PlatformPassword';
     default:
-      return nodeType.replace(/Node$/, '');
+      return nodeType.replace(/Node$/, "");
   }
 }
 
