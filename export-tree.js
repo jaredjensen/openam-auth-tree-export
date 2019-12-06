@@ -4,7 +4,8 @@ const path = require("path")
 const mkdirSync = require('mkdir-recursive').mkdirSync;
 const script = path.basename(process.argv[1]);
 
-const AM_BASE_URL = "http://openam:8886";
+const AM_BASE_URL = "https://default.iam.example.com/am";
+const AM_PASSWORD = "password";
 
 const USAGE = `Exports JSON configuration files for an authentication tree, its individual nodes, and supporting scripts.
 
@@ -115,10 +116,10 @@ async function request(url, ssoToken) {
     headers: {
       iplanetdirectorypro: ssoToken
     },
-    method: "GET"
+    method: "GET",
   };
 
-  const res = await fetch(url, init);
+  const res = await _fetch(url, init);
 
   if (!res.ok) {
     const body = await res.text();
@@ -136,12 +137,12 @@ async function getSession() {
     headers: {
       "accept-api-version": "resource=2.0,protocol=1.0",
       "x-openam-username": "amadmin",
-      "x-openam-password": "password"
+      "x-openam-password": AM_PASSWORD
     },
     method: "POST"
   };
 
-  const res = await fetch(url, init);
+  const res = await _fetch(url, init);
 
   if (!res.ok) {
     console.error(await res.text());
@@ -150,6 +151,15 @@ async function getSession() {
 
   const json = await res.json();
   return json.tokenId;
+}
+
+async function _fetch(url, init) {
+  if (url.startsWith("https:")) {
+    const https = require("https");
+    init.agent = new https.Agent({ rejectUnauthorized: false });
+  }
+  const res = await fetch(url, init);
+  return res;
 }
 
 async function storeEntity(nodeDirName, entity, outDir) {
@@ -179,6 +189,16 @@ function getEntityType(nodeType) {
       return 'OTPCollectorDecision';
     case 'OneTimePasswordSmsSenderNode':
       return 'OTPSMSSender';
+    case 'KbaCreateNode':
+      return 'KBADefinition';
+    case 'KbaDecisionNode':
+      return 'KBADecision';
+    case 'KbaVerifyNode':
+      return 'KBAVerification';
+    case 'ValidatedUsernameNode':
+      return 'PlatformUsername';
+    case 'ValidatedPasswordNode':
+      return 'PlatformPassword';
     default:
       return nodeType.replace(/Node$/, '');
   }
